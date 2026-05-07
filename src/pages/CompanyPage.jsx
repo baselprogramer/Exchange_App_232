@@ -15,20 +15,20 @@ function getSafeMargin(raw) {
 // Always truncate down at 3 decimal places, never round up
 const floor3 = (n) => Math.floor(n * 1000) / 1000;
 
-
 function applyMargin(rate, margin) {
-  const mul = 1 + (Math.abs(Number(margin)) || 0) / 100;
+  const mul  = 1 + (Number(margin) || 0) / 100;
+  console.log(mul , margin);
 
   let clientSell, clientBuy;
 
   if (margin >= 0) {
-    // direction UP — apply margin to sell
+    // direction UP — apply margin to avg for calc the SELL --> then calc the BUY based on SELL to keep the spread consistent
 
     clientSell = Number(rate.mid ?? rate.average ?? rate.avg) * mul;
     clientBuy  = clientSell * 0.990878169449598;
 
   } else {
-    // direction DOWN — apply margin to buy
+    // direction DOWN — apply margin to avg for calc the BUY --> then calc the SELL based on BUY to keep the spread consistent
 
     clientBuy = Number(rate.mid ?? rate.average ?? rate.avg) * mul;
     clientSell = clientBuy * 1.0091218305504;
@@ -40,6 +40,8 @@ function applyMargin(rate, margin) {
   return { ...rate, clientBuy, clientSell, clientAvg };
 }
 
+// For BestRate : 
+
 function exportToExcel(displayRows, margin, maxMargin, source, usdRates) {
   const today    = new Date().toLocaleDateString('ar-SY');
   const srcLabel = source ? FOREX_SOURCE_LABELS[source] : 'النشرة الرسمية';
@@ -48,10 +50,10 @@ function exportToExcel(displayRows, margin, maxMargin, source, usdRates) {
 
   const usdRow = [
     'دولار امريكي', 'USD',
-    usdRates.clientSell, usdRates.clientSell,
-    usdRates.clientBuy,  usdRates.clientBuy,
-    usdRates.clientSell, usdRates.clientSell,
-    usdRates.clientBuy,  usdRates.clientBuy,
+    parseFloat(usdRates.clientSell).toFixed(3), parseFloat(usdRates.clientSell).toFixed(3),
+    floor3(usdRates.clientBuy),  floor3(usdRates.clientBuy),
+    parseFloat(usdRates.clientSell).toFixed(3), parseFloat(usdRates.clientSell).toFixed(3),
+    floor3(usdRates.clientBuy),  floor3(usdRates.clientBuy),
     '/',
     usdRates.clientAvg,
   ];
@@ -111,7 +113,6 @@ ws2['!merges'] = [{s:{r:0,c:0},e:{r:0,c:7}},{s:{r:1,c:0},e:{r:1,c:7}}];
   XLSX.utils.book_append_sheet(wb, ws2, 'نشرة الأسعار');
   XLSX.writeFile(wb, `نشرة_الشركة_${today.replace(/\//g, '-')}.xlsx`);
 }
-
 
 function exportToCurrencyPrices(displayRows, usdRates) {
   const today = new Date().toLocaleDateString('ar-SY');
@@ -207,7 +208,6 @@ export default function CompanyPage() {
     });
   }, [usdRates, forexRows]);
 
-
   const displayRows  = finalRates.length > 0 ? finalRates : rows;
   const canExport    = rows.length > 0;
   const isLoading    = offLoading || fxLoading;
@@ -276,7 +276,7 @@ export default function CompanyPage() {
                 <div className="cmb-inline-row">
                   <span className="cmb-badge cmb-badge--buy">
                     <span className="cmb-badge-label">شراء</span>
-                    {usdRates.clientBuy.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    {floor3(usdRates.clientBuy.toLocaleString())}
                   </span>
                   <span
                     className="cmb-margin-pill"
@@ -290,7 +290,7 @@ export default function CompanyPage() {
                   </span>
                   <span className="cmb-badge cmb-badge--sell">
                     <span className="cmb-badge-label">بيع</span>
-                    {usdRates.clientSell.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    {usdRates.clientSell.toLocaleString()}
                   </span>
                   <span className="cmb-badge cmb-badge--avg">
                     <span className="cmb-badge-label">وسطي</span>
@@ -302,7 +302,7 @@ export default function CompanyPage() {
               <button
                 className="cmb-export"
                 disabled={!canExport}
-                onClick={() =>{
+                onClick={() => {
                   exportToExcel(displayRows, effectiveMargin, maxMargin, forexSource, usdRates);
                   exportToCurrencyPrices(displayRows, usdRates);
                 }}
