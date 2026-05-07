@@ -23,12 +23,16 @@ function applyMargin(rate, margin) {
 
   if (margin >= 0) {
     // direction UP — apply margin to sell
-    clientSell = Number(rate.sell) * mul;
-    clientBuy  = clientSell * 1.0091218305504;
+
+    clientSell = Number(rate.mid ?? rate.average ?? rate.avg) * mul;
+    clientBuy  = clientSell * 0.990878169449598;
+
   } else {
     // direction DOWN — apply margin to buy
-    clientBuy  = Number(rate.buy) * mul;
-    clientSell = clientBuy * 0.990878169449598;
+
+    clientBuy = Number(rate.mid ?? rate.average ?? rate.avg) * mul;
+    clientSell = clientBuy * 1.0091218305504;
+
   }
 
   const clientAvg = (clientSell + clientBuy) / 2;
@@ -40,48 +44,100 @@ function exportToExcel(displayRows, margin, maxMargin, source, usdRates) {
   const today    = new Date().toLocaleDateString('ar-SY');
   const srcLabel = source ? FOREX_SOURCE_LABELS[source] : 'النشرة الرسمية';
 
+  const sypRow = ['ليرة سورية', 'SYP', 1, 1, 1, 1, 1, 1, 1, 1, '/', 1];
+
   const usdRow = [
-    'الدولار الأمريكي', 'USD',
-    usdRates.clientBuy, usdRates.clientSell, usdRates.clientAvg,
-    '', '', '',
+    'دولار امريكي', 'USD',
+    usdRates.clientSell, usdRates.clientSell,
+    usdRates.clientBuy,  usdRates.clientBuy,
+    usdRates.clientSell, usdRates.clientSell,
+    usdRates.clientBuy,  usdRates.clientBuy,
+    '/',
+    usdRates.clientAvg,
   ];
 
-  const ws1 = XLSX.utils.aoa_to_sheet([
-    ['نشرات البنك المركزي السوري — جدول أسعار الشركة'],
-    [`تاريخ: ${today}   |   المصدر: ${srcLabel}   |   هامش البنك المركزي: ${maxMargin}%   |   هامش الشركة: ${margin}%`],
-    [],
-    ['البلد', 'الكود', 'شراء الشركة', 'بيع الشركة', 'وسطي الشركة', `شراء ${srcLabel}`, `بيع ${srcLabel}`, `وسطي ${srcLabel}`],
-    usdRow,
-    ...displayRows
-      .filter(r => r.code !== 'USD')
-      .map(r => {
-        const buy  = r.finalBuy  ?? r.clientBuy;
-        const sell = r.finalSell ?? r.clientSell;
-        const avg  = r.finalAvg  ?? r.clientAvg;
-        return [r.country, r.code, buy, sell, avg, Number(r.buy), Number(r.sell), Number(r.mid ?? r.average ?? r.avg)];
-      }),
-  ]);
-  ws1['!cols']   = [{ wch: 22 }, { wch: 8 }, { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 16 }];
-  ws1['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 7 } }, { s: { r: 1, c: 0 }, e: { r: 1, c: 7 } }];
+  const currencyRows = displayRows
+    .filter(r => r.code !== 'USD')
+    .map(r => {
+      const sell   = r.finalSell ?? r.clientSell;
+      const buy    = r.finalBuy  ?? r.clientBuy;
+      const avg    = r.finalAvg  ?? r.clientAvg;
+      const method = DIVIDE_METHOD.includes(r.code) ? '*' : '/';
+      return [
+        r.country, r.code,
+        sell, sell,
+        buy,  buy,
+        sell, sell,
+        buy,  buy,
+        method,
+        avg,
+      ];
+    });
 
-  const ws2 = XLSX.utils.aoa_to_sheet([
-    ['كود العملة', 'سعر الشراء', 'سعر البيع', 'السعر الوسطي'],
-    ['USD', usdRates.clientBuy, usdRates.clientSell, usdRates.clientAvg],
-    ...displayRows
-      .filter(r => r.code !== 'USD')
-      .map(r => {
-        const buy  = r.finalBuy  ?? r.clientBuy;
-        const sell = r.finalSell ?? r.clientSell;
-        const avg  = r.finalAvg  ?? r.clientAvg;
-        return [r.code, buy, sell, avg];
-      }),
+  const ws1 = XLSX.utils.aoa_to_sheet([
+    ['العملة', 'رمز العملة', 'بيع حوالات', 'اعلى بيع/ح', 'شراء حوالات', 'ادنى شراء/ح', 'بيع صرافة', 'اعلى بيع/ص', 'شراء صرافة', 'ادنى شراء/ص', 'الطريقة', 'سعر التعادل'],
+    sypRow,
+    usdRow,
+    ...currencyRows,
   ]);
-  ws2['!cols'] = [{ wch: 12 }, { wch: 14 }, { wch: 14 }, { wch: 16 }];
+  ws1['!cols'] = [
+    {wch:20},{wch:8},{wch:14},{wch:14},{wch:14},{wch:14},
+    {wch:14},{wch:14},{wch:14},{wch:14},{wch:8},{wch:14},
+  ];
+
+const ws2 = XLSX.utils.aoa_to_sheet([
+  ['نشرات البنك المركزي السوري — جدول أسعار الشركة'],
+  [`تاريخ: ${today}   |   المصدر: ${srcLabel}   |   هامش البنك المركزي: ${maxMargin}%   |   هامش الشركة: ${margin}%`],
+  [],
+  ['البلد', 'الكود', 'شراء الشركة', 'بيع الشركة', 'وسطي الشركة', `شراء ${srcLabel}`, `بيع ${srcLabel}`, `وسطي ${srcLabel}`],
+  ['الدولار الأمريكي', 'USD', usdRates.clientBuy, usdRates.clientSell, usdRates.clientAvg, '', '', ''],
+  ...displayRows
+    .filter(r => r.code !== 'USD')
+    .map(r => [
+      r.country, r.code,
+      r.finalBuy  ?? r.clientBuy,
+      r.finalSell ?? r.clientSell,
+      r.finalAvg  ?? r.clientAvg,
+      Number(r.buy),
+      Number(r.sell),
+      Number(r.mid ?? r.average ?? r.avg),
+    ]),
+]);
+ws2['!cols']   = [{wch:22},{wch:8},{wch:16},{wch:16},{wch:16},{wch:16},{wch:16},{wch:16}];
+ws2['!merges'] = [{s:{r:0,c:0},e:{r:0,c:7}},{s:{r:1,c:0},e:{r:1,c:7}}];
 
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws1, 'نشرة الأسعار');
-  XLSX.utils.book_append_sheet(wb, ws2, 'برنامج الحوالات');
+  XLSX.utils.book_append_sheet(wb, ws1, 'برنامج الحوالات');
+  XLSX.utils.book_append_sheet(wb, ws2, 'نشرة الأسعار');
   XLSX.writeFile(wb, `نشرة_الشركة_${today.replace(/\//g, '-')}.xlsx`);
+}
+
+
+function exportToCurrencyPrices(displayRows, usdRates) {
+  const today = new Date().toLocaleDateString('ar-SY');
+
+  // order matches the template exactly
+  const PRICE_CODES = ['USD','EUR','GBP','JPY', 'TRY' ,'CHF','CAD','DKK','SEK','NOK','KWD','SAR','JOD','BHD','AED','QAR','OMR','EGP','AUD','CNY','RUB'];
+
+  const rows = PRICE_CODES.map(code => {
+    if (code === 'USD') {
+      return [code, usdRates.clientAvg];
+    }
+    const row = displayRows.find(r => r.code === code);
+    if (!row) return [code, ''];
+    const avg = row.finalAvg ?? row.clientAvg;
+    return [code, avg];
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet([
+    ['Code', 'Price'],
+    ...rows,
+  ]);
+  ws['!cols'] = [{wch:10},{wch:14}];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+  XLSX.writeFile(wb, `عامود التعادل_${today.replace(/\//g, '-')}.xlsx`);
 }
 
 const FOREX_SOURCES = [
@@ -91,6 +147,7 @@ const FOREX_SOURCES = [
 ];
 
 const MULTIPLY_CURRENCIES = ['EUR', 'GBP', 'AUD'];
+const DIVIDE_METHOD       = ['AUD', 'GBP', 'EUR'];
 
 export default function CompanyPage() {
   const [selectedId,      setSelectedId]      = useState('USD');
@@ -219,7 +276,7 @@ export default function CompanyPage() {
                 <div className="cmb-inline-row">
                   <span className="cmb-badge cmb-badge--buy">
                     <span className="cmb-badge-label">شراء</span>
-                    {usdRates.clientBuy.toLocaleString()}
+                    {usdRates.clientBuy.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
                   <span
                     className="cmb-margin-pill"
@@ -233,7 +290,7 @@ export default function CompanyPage() {
                   </span>
                   <span className="cmb-badge cmb-badge--sell">
                     <span className="cmb-badge-label">بيع</span>
-                    {usdRates.clientSell.toLocaleString()}
+                    {usdRates.clientSell.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
                   <span className="cmb-badge cmb-badge--avg">
                     <span className="cmb-badge-label">وسطي</span>
@@ -245,7 +302,10 @@ export default function CompanyPage() {
               <button
                 className="cmb-export"
                 disabled={!canExport}
-                onClick={() => exportToExcel(displayRows, effectiveMargin, maxMargin, forexSource, usdRates)}
+                onClick={() =>{
+                  exportToExcel(displayRows, effectiveMargin, maxMargin, forexSource, usdRates);
+                  exportToCurrencyPrices(displayRows, usdRates);
+                }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />

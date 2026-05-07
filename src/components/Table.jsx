@@ -24,7 +24,6 @@ export default function Table({ onMarginChange }) {
     return isUp ? n : -n;
   }, [absValue, maxMargin, isUp]);
 
-  // ✅ أبلّغ CompanyPage بالهامش كل ما تغير
   useEffect(() => {
     onMarginChange?.(effectiveMargin);
   }, [effectiveMargin, onMarginChange]);
@@ -59,8 +58,6 @@ export default function Table({ onMarginChange }) {
     <section className="st-wrapper">
       <div className="st-header-row">
         <div className="st-header-cell">العملة</div>
-        <div className="st-header-cell">الحد الأدنى الوسطي</div>
-        <div className="st-header-cell">الحد الأعلى الوسطي</div>
         <div className="st-header-cell">السعر الوسطي حسب المركزي</div>
         <div className="st-header-cell">هامش الحركة السعري المركزي</div>
         <div className="st-header-cell">اختيار الاتجاه</div>
@@ -69,12 +66,6 @@ export default function Table({ onMarginChange }) {
 
       <div className="st-data-row">
         <div className="st-cell st-cell--name">{currency.country}</div>
-        <div className="st-cell">
-          <span className="st-num">{(average * (1 - maxMargin / 100)).toFixed(2)}</span>
-        </div>
-        <div className="st-cell">
-          <span className="st-num">{(average * (1 + maxMargin / 100)).toFixed(3)}</span>
-        </div>
         <div className="st-cell st-cell--highlight">
           <span className="st-num">{average.toFixed(2)}</span>
         </div>
@@ -118,51 +109,7 @@ export default function Table({ onMarginChange }) {
         </div>
       </div>
 
-      {/* صف شراء */}
-      <div className="st-sub-row">
-        <div className="st-cell st-cell--empty"></div>
-        <div className="st-cell"><span className="st-num">{(buy * (1 - maxMargin/100)).toFixed(2)}</span></div>
-        <div className="st-cell"><span className="st-num">{(buy * (1 + maxMargin/100)).toFixed(2)}</span></div>
-        <div className="st-cell st-cell--sub-label">شراء</div>
-        <div className="st-cell"></div><div className="st-cell"></div><div className="st-cell"></div>
-      </div>
 
-      {/* صف بيع */}
-      <div className="st-sub-row">
-        <div className="st-cell st-cell--empty"></div>
-        <div className="st-cell"><span className="st-num">{(sell * (1 - maxMargin/100)).toFixed(2)}</span></div>
-        <div className="st-cell"><span className="st-num">{(sell * (1 + maxMargin/100)).toFixed(2)}</span></div>
-        <div className="st-cell st-cell--sub-label">بيع</div>
-        <div className="st-cell"></div><div className="st-cell"></div><div className="st-cell"></div>
-      </div>
-
-      {/* صف أسعار العميل */}
-      <div className="st-sub-row" style={{borderTop:'1px solid var(--border-color)',background:'var(--accent-gold-rgba-06)'}}>
-        <div className="st-cell st-cell--empty"></div>
-          <div className="st-cell st-cell--sub-label">سعر العميل</div>
-          <div className="st-cell">
-          <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'2px'}}>
-            <span style={{fontSize:'9px',color:'var(--text-secondary)',fontFamily:'Tajawal,sans-serif',textTransform:'uppercase'}}>شراء العميل</span>
-            <span className="st-num" style={{color:'var(--green)',fontWeight:700,fontSize:'15px'}}>{clientBuy.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-          </div>
-        </div>
-        <div className="st-cell">
-          <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'2px'}}>
-            <span style={{fontSize:'9px',color:'var(--text-secondary)',fontFamily:'Tajawal,sans-serif',textTransform:'uppercase'}}>بيع العميل</span>
-            <span className="st-num" style={{color:'var(--red)',fontWeight:700,fontSize:'15px'}}>{clientSell.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-          </div>
-        </div>
-
-
-        <div className="st-cell">
-          <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'2px'}}>
-            <span style={{fontSize:'9px',color:'var(--text-secondary)',fontFamily:'Tajawal,sans-serif',textTransform:'uppercase'}}>الوسطي</span>
-            <span className="st-num" style={{color:'var(--accent-gold)',fontWeight:700,fontSize:'14px'}}>{clientAvg.toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3})}</span>
-          </div>
-        </div>
-        <div className="st-cell"></div>
-        <div className="st-cell"></div>
-      </div>
     </section>
   );
 }
