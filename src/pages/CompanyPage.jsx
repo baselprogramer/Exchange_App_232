@@ -15,14 +15,26 @@ function getSafeMargin(raw) {
 // Always truncate down at 3 decimal places, never round up
 const floor3 = (n) => Math.floor(n * 1000) / 1000;
 
-function applyMargin(rate, margin) {
-  const mul  = 1 + (Number(margin) || 0) / 100;
-  const avg  = Number(rate.average ?? rate.avg) * mul;
-  const buy  = Number(rate.buy)  * mul;
-  const sell = Number(rate.sell) * mul;
-  return { ...rate, clientBuy: buy, clientSell: sell, clientAvg: avg };
-}
 
+function applyMargin(rate, margin) {
+  const mul = 1 + (Math.abs(Number(margin)) || 0) / 100;
+
+  let clientSell, clientBuy;
+
+  if (margin >= 0) {
+    // direction UP — apply margin to sell
+    clientSell = Number(rate.sell) * mul;
+    clientBuy  = clientSell * 1.0091218305504;
+  } else {
+    // direction DOWN — apply margin to buy
+    clientBuy  = Number(rate.buy) * mul;
+    clientSell = clientBuy * 0.990878169449598;
+  }
+
+  const clientAvg = (clientSell + clientBuy) / 2;
+
+  return { ...rate, clientBuy, clientSell, clientAvg };
+}
 
 function exportToExcel(displayRows, margin, maxMargin, source, usdRates) {
   const today    = new Date().toLocaleDateString('ar-SY');
