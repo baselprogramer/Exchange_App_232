@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const FOREX_URL   = 'https://skydeliverydash.tuqaatech.info/api/currency/Forex';
+const FOREX_URL   = 'https://prices-api.salahsoft.net/api/currency/Forex';
 const REUTERS_KEY = '4a6d0ef868b7cb56ef97f962';
 
 const FLAGS = {
@@ -45,7 +45,7 @@ function buildRows(rates) {
 }
 
 async function fetchCentral() {
-  const res = await fetch(FOREX_URL);
+  const res = await fetch(FOREX_URL,{credentials: 'include'});
   if (!res.ok) throw new Error('Network error');
   const data = await res.json();
   

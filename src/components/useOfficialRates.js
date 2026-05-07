@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const OFFICIAL_URL = 'https://skydeliverydash.tuqaatech.info/api/currency/official';
+const OFFICIAL_URL = 'https://prices-api.salahsoft.net/api/currency/official';
 
 let cachedRates = null;
 let cachedMargin = null;
@@ -23,7 +23,7 @@ export function useOfficialRates() {
     }
 
     setLoading(true);
-    fetch(OFFICIAL_URL)
+    fetch(OFFICIAL_URL,{credentials: 'include'})
       .then(res => {
         if (!res.ok) throw new Error('Network error');
         return res.json();
