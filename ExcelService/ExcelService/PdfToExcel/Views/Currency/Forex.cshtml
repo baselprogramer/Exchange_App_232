@@ -1,0 +1,161 @@
+﻿@model List<PdfToExcel.Models.ForexCurrency>
+
+<div class="currency-page" data-type="forex">
+    <h2 class="mb-3">Forex Table</h2>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <div id="statusMessage" class="alert d-none" role="alert"></div>
+
+    <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+        <form method="post" enctype="multipart/form-data" asp-action="UploadExcel" class="d-flex gap-2 align-items-center">
+            <input type="hidden" name="type" value="forex" />
+            <input type="file" name="file" class="form-control" accept=".xlsx" required />
+            <button class="btn btn-primary" type="submit">Import</button>
+        </form>
+
+        <a asp-action="DownloadExcel" asp-route-type="forex" class="btn btn-outline-secondary">Download</a>
+
+        <button id="publishBtn" class="btn btn-success" type="button">Publish (Get API)</button>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered align-middle" id="currencyTable">
+            <thead class="table-light">
+                <tr>
+                    <th>Id</th>
+                    <th>Flag</th>
+                    <th>Currency Name</th>
+                    <th>Currency Code</th>
+					<th>Mid</th>
+                    <th>Sell</th>
+                    <th>Buy</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model)
+                {
+                    <tr>
+                        <td>@c.Id</td>
+                        <td><img src="@c.Flag" width="30" alt="@c.Code flag" /></td>
+                        <td>@c.Country</td>
+                        <td>@c.Code</td>
+                        <td>@c.Mid</td>
+                        <td>@c.Sell</td>
+                        <td>@c.Buy</td>  
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <button id="clearBtn" class="btn btn-danger" type="button">
+            Clear Table
+        </button>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+        (() => {
+            const publishBtn = document.getElementById('publishBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const status = document.getElementById('statusMessage');
+            const tbody = document.querySelector('#currencyTable tbody');
+
+            const setMessage = (text, isSuccess) => {
+                status.textContent = text;
+                status.classList.remove('d-none', 'alert-success', 'alert-danger');
+                status.classList.add(isSuccess ? 'alert-success' : 'alert-danger');
+            };
+
+            const renderRows = (rows) => {
+                tbody.innerHTML = '';
+
+                // sort by id
+                rows.sort((a, b) => Number(a.id) - Number(b.id));
+
+                rows.forEach((row) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${row.id ?? ''}</td>
+                        <td>${row.flag ? `<img src="${row.flag}" width="30" />` : ''}</td>
+                        <td>${row.country ?? ''}</td>
+                        <td>${row.code ?? ''}</td>
+						<td>${row.mid ?? ''}</td>
+                        <td>${row.sell ?? ''}</td>
+                        <td>${row.buy ?? ''}</td>
+                   `;
+                    tbody.appendChild(tr);
+                });
+            };
+
+            const refreshFromApi = async () => {
+                const response = await fetch('/api/currency/forex');
+                if (!response.ok) throw new Error('Failed to fetch data');
+                const payload = await response.json();
+                renderRows(payload.rows || []);
+                return payload.total || 0;
+            };
+
+            // PUBLISH
+            publishBtn.addEventListener('click', async () => {
+                publishBtn.disabled = true;
+
+                try {
+                    const res = await fetch('/Currency/PublishForex', {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message);
+
+                    const total = await refreshFromApi();
+                    setMessage(`${data.message} (${total} rows)`, true);
+
+                } catch (err) {
+                    setMessage(err.message, false);
+                } finally {
+                    publishBtn.disabled = false;
+                }
+            });
+
+		   // Clear table
+            clearBtn.addEventListener('click', async () => {
+
+                if (!confirm('⚠️ This will permanently delete all data. Continue?')) return;
+
+                clearBtn.disabled = true;
+
+                try {
+                    const type = document.querySelector('.currency-page').dataset.type;
+
+                    const res = await fetch('/Currency/Clear', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ type })
+                    });
+
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message);
+
+                    tbody.innerHTML = '';
+                    setMessage(data.message, true);
+
+                } catch (err) {
+                    setMessage(err.message, false);
+                } finally {
+                    clearBtn.disabled = false;
+                }
+            });
+
+        })();
+</script>
+}

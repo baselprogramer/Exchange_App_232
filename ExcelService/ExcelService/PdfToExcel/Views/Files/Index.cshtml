@@ -1,0 +1,95 @@
+@model List<PdfToExcel.Models.ConvertedFile>
+@{
+    ViewData["Title"] = "AI Conversion";
+}
+
+<div class="row g-4">
+    <div class="col-12">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+    </div>
+
+    <div class="col-12 col-lg-5">
+        <div class="card shadow-sm app-card">
+            <div class="card-body">
+                <h2 class="h4 mb-3">Upload PDF</h2>
+                <p class="text-muted mb-4">Upload a PDF, run OCR, and save the converted Excel in the database.</p>
+
+                <form method="post" enctype="multipart/form-data" asp-action="Upload" class="d-grid gap-3">
+                    <input class="form-control" type="file" name="file" accept=".pdf,application/pdf" required />
+                    <button class="btn btn-primary" type="submit">Convert with OCR &amp; Save</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-7">
+        <div class="card shadow-sm app-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h4 mb-0">Converted Files</h2>
+                    <span class="badge text-bg-light border">@ViewBag.TotalFiles file(s)</span>
+                </div>
+
+                @if (!Model.Any())
+                {
+                    <p class="text-muted mb-0">No converted files yet. Upload your first PDF to get started.</p>
+                }
+                else
+                {
+                    <div class="table-responsive" style="max-height: 450px; overflow-y: auto;">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Uploaded</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var file in Model)
+                                {
+                                    <tr>
+                                        <td class="file-name">@file.FileName</td>
+                                        <td>@file.CreatedAt.ToString("MMM dd, yyyy HH:mm")</td>
+                                        <td class="text-end">
+                                            <a class="btn btn-sm btn-outline-primary me-2" asp-action="Download" asp-route-id="@file.Id">Download</a>
+
+                                            <form asp-action="Delete" method="post" class="d-inline">
+                                                <input type="hidden" name="id" value="@file.Id" />
+                                                <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        @if (ViewBag.TotalPages > 1)
+                        {
+                            <nav>
+                                <ul class="pagination justify-content-center mt-3">
+
+                                    @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                                    {
+                                        <li class="page-item @(i == ViewBag.Page ? "active" : "")">
+                                            <a class="page-link" asp-action="Index" asp-route-page="@i">
+                                                @i
+                                            </a>
+                                        </li>
+                                    }
+
+                                </ul>
+                            </nav>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

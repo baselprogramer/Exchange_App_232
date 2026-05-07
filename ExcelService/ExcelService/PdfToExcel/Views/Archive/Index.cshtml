@@ -1,0 +1,55 @@
+@model List<PdfToExcel.Models.BulletinArchive>
+@{
+    ViewData["Title"] = "Bulletin Archive";
+}
+
+<h2> Bulletin Archive</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<table class="table table-bordered table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Date</th>
+            <th>Forex</th>
+            <th>Official</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Date.ToString("yyyy-MM-dd")</td>
+                <td>
+                    @if (!string.IsNullOrEmpty(item.ForexFilePath))
+                    {
+                        <a href="/Archive/Download/@item.Id?type=forex" class="btn btn-sm btn-outline-primary">
+                            ⬇ Forex
+                        </a>
+                    }
+                    else { <span class="text-muted">—</span> }
+                </td>
+                <td>
+                    @if (!string.IsNullOrEmpty(item.OfficialFilePath))
+                    {
+                        <a href="/Archive/Download/@item.Id?type=official" class="btn btn-sm btn-outline-success">
+                            ⬇ Official
+                        </a>
+                    }
+                    else { <span class="text-muted">—</span> }
+                </td>
+                <td>
+                    <form method="post" action="/Archive/Delete/@item.Id"
+                          onsubmit="return confirm('Delete this record?')">
+                        @Html.AntiForgeryToken()
+                        <button class="btn btn-sm btn-danger">🗑 Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
