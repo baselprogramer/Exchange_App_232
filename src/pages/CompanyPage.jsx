@@ -17,8 +17,6 @@ const floor3 = (n) => Math.floor(n * 1000) / 1000;
 
 function applyMargin(rate, margin) {
   const mul  = 1 + (Number(margin) || 0) / 100;
-  console.log(mul , margin);
-
   let clientSell, clientBuy;
 
   if (margin >= 0) {
@@ -87,31 +85,9 @@ function exportToExcel(displayRows, margin, maxMargin, source, usdRates) {
     {wch:14},{wch:14},{wch:14},{wch:14},{wch:8},{wch:14},
   ];
 
-const ws2 = XLSX.utils.aoa_to_sheet([
-  ['نشرات البنك المركزي السوري — جدول أسعار الشركة'],
-  [`تاريخ: ${today}   |   المصدر: ${srcLabel}   |   هامش البنك المركزي: ${maxMargin}%   |   هامش الشركة: ${margin}%`],
-  [],
-  ['البلد', 'الكود', 'شراء الشركة', 'بيع الشركة', 'وسطي الشركة', `شراء ${srcLabel}`, `بيع ${srcLabel}`, `وسطي ${srcLabel}`],
-  ['الدولار الأمريكي', 'USD', usdRates.clientBuy, usdRates.clientSell, usdRates.clientAvg, '', '', ''],
-  ...displayRows
-    .filter(r => r.code !== 'USD')
-    .map(r => [
-      r.country, r.code,
-      r.finalBuy  ?? r.clientBuy,
-      r.finalSell ?? r.clientSell,
-      r.finalAvg  ?? r.clientAvg,
-      Number(r.buy),
-      Number(r.sell),
-      Number(r.mid ?? r.average ?? r.avg),
-    ]),
-]);
-ws2['!cols']   = [{wch:22},{wch:8},{wch:16},{wch:16},{wch:16},{wch:16},{wch:16},{wch:16}];
-ws2['!merges'] = [{s:{r:0,c:0},e:{r:0,c:7}},{s:{r:1,c:0},e:{r:1,c:7}}];
-
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws1, 'برنامج الحوالات');
-  XLSX.utils.book_append_sheet(wb, ws2, 'نشرة الأسعار');
-  XLSX.writeFile(wb, `نشرة_الشركة_${today.replace(/\//g, '-')}.xlsx`);
+  XLSX.writeFile(wb, `نشرة_برنامج_BestRate${today.replace(/\//g, '-')}.xlsx`);
 }
 
 function exportToCurrencyPrices(displayRows, usdRates) {
@@ -122,7 +98,7 @@ function exportToCurrencyPrices(displayRows, usdRates) {
 
   const rows = PRICE_CODES.map(code => {
     if (code === 'USD') {
-      return [code, usdRates.clientAvg];
+      return [code, floor3(usdRates.clientAvg)];
     }
     const row = displayRows.find(r => r.code === code);
     if (!row) return [code, ''];
@@ -139,6 +115,38 @@ function exportToCurrencyPrices(displayRows, usdRates) {
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
   XLSX.writeFile(wb, `عامود التعادل_${today.replace(/\//g, '-')}.xlsx`);
+}
+
+// For CentralBank :
+
+function exportToExcelCentral(displayRows, margin, maxMargin, source, usdRates)
+{
+  const today    = new Date().toLocaleDateString('ar-SY');
+  const srcLabel = source ? FOREX_SOURCE_LABELS[source] : 'النشرة الرسمية';
+  const ws = XLSX.utils.aoa_to_sheet([
+  ['نشرات البنك المركزي السوري — جدول أسعار الشركة'],
+  [`تاريخ: ${today}   |   المصدر: ${srcLabel}   |   هامش البنك المركزي: ${maxMargin}%   |   هامش الشركة: ${margin}%`],
+  [],
+  ['البلد', 'الكود', 'شراء الشركة', 'بيع الشركة', 'وسطي الشركة', `شراء ${srcLabel}`, `بيع ${srcLabel}`, `وسطي ${srcLabel}`],
+  ['الدولار الأمريكي', 'USD', floor3(usdRates.clientBuy), floor3(usdRates.clientSell), floor3(usdRates.clientAvg), '', '', ''],
+  ...displayRows
+    .filter(r => r.code !== 'USD')
+    .map(r => [
+      r.country, r.code,
+      r.finalBuy  ?? r.clientBuy,
+      r.finalSell ?? r.clientSell,
+      r.finalAvg  ?? r.clientAvg,
+      Number(r.buy),
+      Number(r.sell),
+      Number(r.mid ?? r.average ?? r.avg),
+    ]),
+  ]);
+  ws['!cols']   = [{wch:22},{wch:8},{wch:16},{wch:16},{wch:16},{wch:16},{wch:16},{wch:16}];
+  ws['!merges'] = [{s:{r:0,c:0},e:{r:0,c:7}},{s:{r:1,c:0},e:{r:1,c:7}}];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'نشرة الأسعار');
+  XLSX.writeFile(wb, `نشرة_الشركة_لتقرير_المركزي_${today.replace(/\//g, '-')}.xlsx`);
 }
 
 const FOREX_SOURCES = [
@@ -304,6 +312,7 @@ export default function CompanyPage() {
                 disabled={!canExport}
                 onClick={() => {
                   exportToExcel(displayRows, effectiveMargin, maxMargin, forexSource, usdRates);
+                  exportToExcelCentral(displayRows, effectiveMargin, maxMargin, forexSource, usdRates);
                   exportToCurrencyPrices(displayRows, usdRates);
                 }}
               >

@@ -1117,8 +1117,8 @@ body  {
   gap: 5px;
 }
 .cmb-badge-label  { font-size: 9px; opacity: .7; letter-spacing: .04em; font-family: 'Tajawal', sans-serif; }
-.cmb-badge--buy   { border: 1px solid var(--green-border); color: var(--green); background: var(--green-bg); }
-.cmb-badge--sell  { border: 1px solid var(--red-border);   color: var(--red);   background: var(--red-bg);   }
+.cmb-badge--buy   { border: 1px solid var(--red-border); color: var(--red); background: var(--red-bg); }
+.cmb-badge--sell  { border: 1px solid var(--green-border );   color: var(--green);   background: var(--green-bg);   }
 .cmb-badge--avg   { border: 1px solid var(--accent-gold-rgba-40); color: var(--accent-gold); background: var(--accent-gold-rgba-08); }
 
 .cmb-margin-pill {
@@ -1263,8 +1263,8 @@ body  {
 /* ── column classes ── */
 .col-sep-after  { border-left: 1px solid var(--border-color); }
 .mgt-official   { opacity: .55; }
-.mgt-buy        { color: var(--green) !important; font-weight: 700; }
-.mgt-sell       { color: var(--red)   !important; font-weight: 700; }
+.mgt-buy        { color: var(--red) !important; font-weight: 700; }
+.mgt-sell       { color: var(--green)   !important; font-weight: 700; }
 .mgt-avg        { color: var(--accent-gold) !important; font-weight: 700; }
 .chip__value.mgt-buy  { color: var(--green); }
 .chip__value.mgt-sell { color: var(--red); }
