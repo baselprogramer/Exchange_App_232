@@ -48,9 +48,9 @@ function exportToExcel(displayRows, margin, maxMargin, source, usdRates) {
 
   const usdRow = [
     'دولار امريكي', 'USD',
-    parseFloat(usdRates.clientSell).toFixed(3), parseFloat(usdRates.clientSell).toFixed(3),
+    floor3(usdRates.clientSell), floor3(usdRates.clientSell),
     floor3(usdRates.clientBuy),  floor3(usdRates.clientBuy),
-    parseFloat(usdRates.clientSell).toFixed(3), parseFloat(usdRates.clientSell).toFixed(3),
+    floor3(usdRates.clientSell), floor3(usdRates.clientSell),
     floor3(usdRates.clientBuy),  floor3(usdRates.clientBuy),
     '/',
     usdRates.clientAvg,
