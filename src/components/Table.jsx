@@ -83,7 +83,7 @@ export default function Table({ onMarginChange }) {
           </span>
         </div>
         <div className="st-cell st-cell--company" style={{flexDirection:'column',gap:'3px'}}>
-          <div style={{display:'flex',alignItems:'center',gap:'4px'}}>
+          <div style={{display:'inline-flex',alignItems:'center',gap:'5px'}}>
             <input
               className="st-num"
               type="number"
@@ -94,7 +94,7 @@ export default function Table({ onMarginChange }) {
               min={-maxMargin}
               max={maxMargin}
               style={{
-                width:'72px', padding:'4px 6px',
+                width:'100px', padding:'4px 6px',margin:"auto",
                 background: !hasValue ? 'var(--accent-gold-rgba-06)' : isUp ? 'var(--green-bg)' : 'var(--red-bg)',
                 border:`1px solid ${marginErr ? 'var(--red-border)' : !hasValue ? 'var(--border-heavy)' : isUp ? 'var(--green-border)' : 'var(--red-border)'}`,
                 borderRadius:'6px',
@@ -103,7 +103,7 @@ export default function Table({ onMarginChange }) {
                 textAlign:'center', outline:'none', direction:'ltr',
               }}
             />
-            <span style={{color:'var(--text-secondary)',fontWeight:600,fontSize:'12px'}}>%</span>
+            <span style={{color:'var(--text-secondary)',fontWeight:600,fontSize:'12px' , marginRight : '5px'}}>%</span>
           </div>
           {marginErr && <span style={{fontSize:'10px',color:'var(--red)',fontFamily:'Tajawal,sans-serif'}}>{marginErr}</span>}
         </div>

@@ -458,7 +458,7 @@ body  {
 .st-data-row,
 .st-sub-row {
   display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr 1.3fr 1fr 1.1fr 1.2fr;
+  grid-template-columns: 1fr .7fr .7fr .7fr .5fr !important;
   align-items: center;
   direction: rtl;
   min-width: 700px;
