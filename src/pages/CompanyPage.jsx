@@ -217,7 +217,7 @@ export default function CompanyPage() {
   }, [usdRates, forexRows]);
 
   const displayRows  = finalRates.length > 0 ? finalRates : rows;
-  const canExport    = rows.length > 0;
+  const canExport    = rows.length > 0 && forexSource;
   const isLoading    = offLoading || fxLoading;
   const error        = offError || fxError;
   const marginColor  = effectiveMargin > 0 ? 'var(--green)' : effectiveMargin < 0 ? 'var(--red)' : 'var(--text-secondary)';
@@ -309,12 +309,17 @@ export default function CompanyPage() {
 
               <button
                 className="cmb-export"
-                disabled={!canExport}
                 onClick={() => {
-                  exportToExcel(displayRows, effectiveMargin, maxMargin, forexSource, usdRates);
-                  exportToExcelCentral(displayRows, effectiveMargin, maxMargin, forexSource, usdRates);
-                  exportToCurrencyPrices(displayRows, usdRates);
-                }}
+                  if (canExport) {
+
+                    exportToExcel(displayRows, effectiveMargin, maxMargin, forexSource, usdRates);
+                    exportToExcelCentral(displayRows, effectiveMargin, maxMargin, forexSource, usdRates);
+                    exportToCurrencyPrices(displayRows, usdRates);
+                    alert('تم تصدير البيانات بنجاح! يرجى التحقق من مجلد التنزيلات لديك ✅');
+ 
+                  } else {
+                    alert('لا توجد بيانات لتصديرها ! يرجى التأكد من اختيار مصدر الفوركس المعتمد قبل التصدير ❌');
+                  }}}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
