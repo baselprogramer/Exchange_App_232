@@ -127,8 +127,8 @@ function exportToExcelCentral(displayRows, margin, maxMargin, source, usdRates)
   ['نشرات البنك المركزي السوري — جدول أسعار الشركة'],
   [`تاريخ: ${today}   |   المصدر: ${srcLabel}   |   هامش البنك المركزي: ${maxMargin}%   |   هامش الشركة: ${margin}%`],
   [],
-  ['البلد', 'الكود', 'شراء الشركة', 'بيع الشركة', 'وسطي الشركة', `شراء ${srcLabel}`, `بيع ${srcLabel}`, `وسطي ${srcLabel}`],
-  ['الدولار الأمريكي', 'USD', floor3(usdRates.clientBuy), floor3(usdRates.clientSell), floor3(usdRates.clientAvg), '', '', ''],
+  ['البلد', 'الكود', 'الشراء المعتمد', 'البيع المعتمد', 'الوسطي المعتمد', 'الهامش',`شراء ${srcLabel}`, `بيع ${srcLabel}`, `وسطي ${srcLabel}`],
+  ['الدولار الأمريكي', 'USD', floor3(usdRates.clientBuy), floor3(usdRates.clientSell), floor3(usdRates.clientAvg), floor3(usdRates.clientSell - usdRates.clientBuy),'', '', ''],
   ...displayRows
     .filter(r => r.code !== 'USD')
     .map(r => [
@@ -139,6 +139,7 @@ function exportToExcelCentral(displayRows, margin, maxMargin, source, usdRates)
       Number(r.buy),
       Number(r.sell),
       Number(r.mid ?? r.average ?? r.avg),
+      Number(r.sell) - Number(r.buy),
     ]),
   ]);
   ws['!cols']   = [{wch:22},{wch:8},{wch:16},{wch:16},{wch:16},{wch:16},{wch:16},{wch:16}];
