@@ -37,14 +37,6 @@ export function useOfficialRates() {
 
       .then(data => {
         const rows = data.rows || [];
-
-        console.log("الـ Object كامل:", data);
-    console.log("Keys الموجودة:", Object.keys(data));
-    console.log("قيمة النشرة:", data.bulletinNumber);
-
-
-
-
         cachedRates = rows;
         cachedMargin = data.priceMargin || null;
         cachedBulletinNumber = data.bulletinNumber || null;
@@ -56,8 +48,6 @@ export function useOfficialRates() {
         setPublishDate(data.publishDate || null);
         
         setLoading(false);
-
-        console.log(data.bulletinNumber, data.publishDate , data.priceMargin);
       })
       .catch(() => {
         setError('تعذّر تحميل البيانات، تحقق من الاتصال وأعد المحاولة.');

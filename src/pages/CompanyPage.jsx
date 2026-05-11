@@ -41,9 +41,8 @@ function applyMargin(rate, margin) {
 // For BestRate : 
 
 function exportToExcel(displayRows, margin, maxMargin, source, usdRates) {
-  const today    = new Date().toLocaleDateString('ar-SY');
-  const srcLabel = source ? FOREX_SOURCE_LABELS[source] : 'النشرة الرسمية';
 
+  const today = new Date().toLocaleDateString('ar-SY');
   const sypRow = ['ليرة سورية', 'SYP', 1, 1, 1, 1, 1, 1, 1, 1, '/', 1];
 
   const usdRow = [
@@ -92,7 +91,6 @@ function exportToExcel(displayRows, margin, maxMargin, source, usdRates) {
 
 function exportToCurrencyPrices(displayRows, usdRates) {
   const today = new Date().toLocaleDateString('ar-SY');
-
   // order matches the template exactly
   const PRICE_CODES = ['USD','EUR','GBP','JPY', 'TRY' ,'CHF','CAD','DKK','SEK','NOK','KWD','SAR','JOD','BHD','AED','QAR','OMR','EGP','AUD','CNY','RUB'];
 
@@ -119,15 +117,14 @@ function exportToCurrencyPrices(displayRows, usdRates) {
 
 // For CentralBank :
 
-function exportToExcelCentral(displayRows, margin, maxMargin, source, usdRates)
+function exportToExcelCentral(displayRows, margin, maxMargin, source, usdRates , bulletinNumber , publishDate)
 {
-  const { bulletinNumber , publishDate } = useOfficialRates();
-  const today    = publishDate ? new Date(publishDate).toLocaleDateString('ar-SY') : `تاريخ غير متوفر`;
+  const today    = new Date().toLocaleDateString('ar-SY');
+  const formattedPublishDate = publishDate ? new Date(publishDate).toLocaleDateString('ar-SY') : 'تاريخ غير متوفر';
   const srcLabel = source ? FOREX_SOURCE_LABELS[source] : 'النشرة الرسمية';
-  const bulletinInfo = bulletinNumber ? `النشرة رقم ${bulletinNumber}` : 'رقم النشرة غير متوفر';
   const ws = XLSX.utils.aoa_to_sheet([
   ['نشرات البنك المركزي السوري — جدول أسعار الشركة'],
-  [`تاريخ: ${today}   |   المصدر: ${srcLabel}   |   هامش البنك المركزي: ${maxMargin}%   |   هامش الشركة: ${margin}%   | رقم النشرة : ${bulletinInfo}`],
+  [`تاريخ: ${formattedPublishDate}   |   المصدر: ${srcLabel}   |   هامش البنك المركزي: ${maxMargin}%   |   هامش الشركة: ${margin}%   | رقم النشرة : ${bulletinNumber}`],
   [],
   ['البلد', 'الكود', 'الشراء المعتمد', 'البيع المعتمد', 'الوسطي المعتمد', 'الهامش',`شراء ${srcLabel}`, `بيع ${srcLabel}`, `وسطي ${srcLabel}`],
   ['الدولار الأمريكي', 'USD', floor3(usdRates.clientBuy), floor3(usdRates.clientSell), floor3(usdRates.clientAvg), floor3(usdRates.clientSell - usdRates.clientBuy),'', '', ''],
@@ -168,7 +165,7 @@ export default function CompanyPage() {
   const [dropOpen,        setDropOpen]        = useState(false);
   const dropRef = useRef(null);
 
-  const { rates: officialRates, loading: offLoading, error: offError, priceMargin , bulletinNumber } = useOfficialRates();
+  const { rates: officialRates, loading: offLoading, error: offError, priceMargin , bulletinNumber , publishDate} = useOfficialRates();
   const { rows: forexRows,      loading: fxLoading,  error: fxError  }              = useForexRates(forexSource);
 
   const maxMargin = getSafeMargin(priceMargin);
@@ -321,7 +318,7 @@ export default function CompanyPage() {
                   if (canExport) {
 
                     exportToExcel(displayRows, effectiveMargin, maxMargin, forexSource, usdRates);
-                    exportToExcelCentral(displayRows, effectiveMargin, maxMargin, forexSource, usdRates);
+                    exportToExcelCentral(displayRows, effectiveMargin, maxMargin, forexSource, usdRates , bulletinNumber , publishDate);
                     exportToCurrencyPrices(displayRows, usdRates);
                     alert('تم تصدير البيانات بنجاح! يرجى التحقق من مجلد التنزيلات لديك ✅');
  
