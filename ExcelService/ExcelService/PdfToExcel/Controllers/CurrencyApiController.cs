@@ -55,15 +55,15 @@ public class CurrencyApiController : ControllerBase
             })
             .ToListAsync();
 
-        var priceMargin = await _context.PriceMargins
-            .Select(x => x.PriceMargin)
-            .FirstOrDefaultAsync();
+       var priceMarginRecord = await _context.PriceMargins.FirstOrDefaultAsync();
 
         return Ok(new
         {
-            rows = data,
-            total = data.Count,
-            priceMargin = priceMargin
+            rows         = data,
+            total        = data.Count,
+            priceMargin  = priceMarginRecord?.PriceMargin,
+            bulletinNumber = priceMarginRecord?.BulletinNumber,   // 👈 new
+            publishDate  = priceMarginRecord?.PublishDate,        // 👈 new
         });
     }
 }

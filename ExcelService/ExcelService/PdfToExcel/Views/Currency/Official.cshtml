@@ -26,11 +26,24 @@
 
         <button id="publishBtn" class="btn btn-success" type="button">Publish (Get API)</button>
     </div>
-    <input 
-  type="number" 
-  step="0.01"
-  id="priceMarginInput" 
-  placeholder="الهامش السعري (اختياري)" />
+        
+        <input 
+        type="number" 
+        step="0.01"
+        id="priceMarginInput" 
+        placeholder="الهامش السعري" />
+
+        <input 
+        type="number" 
+        step="1"
+        id="bulletinNumberInput" 
+        placeholder="رقم النشرة" />
+
+        <input 
+        type="datetime-local"
+        id="publishDateInput"
+        class="form-control"
+        readonly />
 
     <div class="table-responsive">
         <table class="table table-striped table-bordered align-middle" id="currencyTable">
@@ -75,6 +88,17 @@
             const clearBtn = document.getElementById('clearBtn');
             const status = document.getElementById('statusMessage');
             const tbody = document.querySelector('#currencyTable tbody');
+            const priceMarginInput  = document.getElementById('priceMarginInput');
+            const bulletinInput     = document.getElementById('bulletinNumberInput');
+            const publishDateInput  = document.getElementById('publishDateInput');
+
+
+            // auto-set current datetime on page load
+            const now = new Date();
+            const localIso = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+                .toISOString()
+                .slice(0, 16);
+            publishDateInput.value = localIso;
 
             const setMessage = (text, isSuccess) => {
                 status.textContent = text;
@@ -105,46 +129,54 @@
             };
 
             const refreshFromApi = async () => {
-                const response = await fetch('/api/currency/official');
-                if (!response.ok) throw new Error('Failed to fetch data');
-                const payload = await response.json();
-                renderRows(payload.rows || []);
-                document.getElementById('priceMarginInput').value =
-               payload.priceMargin ?? '';
+            const response = await fetch('/api/currency/official');
+            if (!response.ok) throw new Error('Failed to fetch data');
+            const payload = await response.json();
+            renderRows(payload.rows || []);
 
-                return payload.total || 0;
-            };
+            priceMarginInput.value = payload.priceMargin    ?? '';
+            bulletinInput.value    = payload.bulletinNumber ?? '';
+            publishDateInput.value = payload.publishDate
+                ? new Date(payload.publishDate).toTimeString().slice(0, 5)
+                : '';
+
+            return payload.total || 0;
+        };
 
             // Publish
-                   publishBtn.addEventListener('click', async () => {
+            publishBtn.addEventListener('click', async () => {
             publishBtn.disabled = true;
 
-            try {
-                const marginValue = document.getElementById('priceMarginInput').value;
+                try {
+                    const marginValue   = priceMarginInput.value;
+                    const bulletinValue = bulletinInput.value;
+                    const dateValue     = publishDateInput.value;
 
-                const res = await fetch('/Currency/PublishOfficial', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify({
-                        priceMargin: marginValue ? parseFloat(marginValue) : null
-                    })
-                });
+                    const res = await fetch('/Currency/PublishOfficial', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({
+                            priceMargin:    marginValue   ? parseFloat(marginValue)  : null,
+                            bulletinNumber: bulletinValue ? parseInt(bulletinValue)  : null,
+                            publishDate:    dateValue     ? dateValue                : null,
+                        })
+                    });
 
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.message);
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message);
 
-                const total = await refreshFromApi();
-                setMessage(`${data.message} (${total} rows)`, true);
+                    const total = await refreshFromApi();
+                    setMessage(`${data.message} (${total} rows)`, true);
 
-            } catch (err) {
-                setMessage(err.message, false);
-            } finally {
-                publishBtn.disabled = false;
-            }
-        });
+                } catch (err) {
+                    setMessage(err.message, false);
+                } finally {
+                    publishBtn.disabled = false;
+                }
+            });
 
 			// Clear table
             clearBtn.addEventListener('click', async () => {

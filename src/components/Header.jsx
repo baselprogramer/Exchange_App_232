@@ -1,6 +1,10 @@
 import Logo from '../assets/logo.svg';
+import { useOfficialRates } from './useOfficialRates';
+
 
 export default function Header({ theme, onToggleTheme }) {
+
+  const { publishDate } = useOfficialRates();
   return (
     <header className="header-container">
       <div className="header-left">
@@ -10,10 +14,16 @@ export default function Header({ theme, onToggleTheme }) {
       <div className="header-right">
         <div className="header-sync-info">
           <span className="header-sync-label">Last Sync</span>
-          <span className="header-sync-time table-numeric">{new Date().toLocaleString('en-US', {
-            year: 'numeric', month: '2-digit', day: '2-digit',
-            hour: '2-digit', minute: '2-digit', second: '2-digit'
-          })}</span>
+          <span>
+              {publishDate ? new Date(publishDate).toLocaleString('en-us', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+              }) : 'جاري التحميل...'}
+        </span>
         </div>
         <button
           className="theme-toggle"

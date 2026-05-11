@@ -1,7 +1,7 @@
 import { useSearchParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
-const FOREX_URL    = 'https://prices-api.salahsoft.net/api/currency/Forex';
+const FOREX_URL    = 'https://api.lira-guide.com/api/currency/Forex';
 const REUTERS_KEY  = '4a6d0ef868b7cb56ef97f962';
 
 // ── Fetchers ─────────────────────────────────────────────────────────────────

@@ -60,7 +60,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("FrontendPolicy",
         policy =>
         {
-            policy.WithOrigins("http://10.16.150.54:80" , "http://localhost:80" , "http://localhost" , "http://10.16.150.54" , "http://10.16.150.54:90" , "https://prices-api.salahsoft.net" , "https://prices.salahsoft.net" )
+            policy.WithOrigins("http://10.16.150.54:80" , "http://localhost:80" , "http://localhost" , "http://10.16.150.54" , "http://10.16.150.54:90" , "https://api.lira-guide.com" , "https://lira-guide.com" )
                   .AllowAnyMethod()
                   .AllowAnyHeader()
                   .AllowCredentials();

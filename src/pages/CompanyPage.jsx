@@ -121,11 +121,13 @@ function exportToCurrencyPrices(displayRows, usdRates) {
 
 function exportToExcelCentral(displayRows, margin, maxMargin, source, usdRates)
 {
-  const today    = new Date().toLocaleDateString('ar-SY');
+  const { bulletinNumber , publishDate } = useOfficialRates();
+  const today    = publishDate ? new Date(publishDate).toLocaleDateString('ar-SY') : `تاريخ غير متوفر`;
   const srcLabel = source ? FOREX_SOURCE_LABELS[source] : 'النشرة الرسمية';
+  const bulletinInfo = bulletinNumber ? `النشرة رقم ${bulletinNumber}` : 'رقم النشرة غير متوفر';
   const ws = XLSX.utils.aoa_to_sheet([
   ['نشرات البنك المركزي السوري — جدول أسعار الشركة'],
-  [`تاريخ: ${today}   |   المصدر: ${srcLabel}   |   هامش البنك المركزي: ${maxMargin}%   |   هامش الشركة: ${margin}%`],
+  [`تاريخ: ${today}   |   المصدر: ${srcLabel}   |   هامش البنك المركزي: ${maxMargin}%   |   هامش الشركة: ${margin}%   | رقم النشرة : ${bulletinInfo}`],
   [],
   ['البلد', 'الكود', 'الشراء المعتمد', 'البيع المعتمد', 'الوسطي المعتمد', 'الهامش',`شراء ${srcLabel}`, `بيع ${srcLabel}`, `وسطي ${srcLabel}`],
   ['الدولار الأمريكي', 'USD', floor3(usdRates.clientBuy), floor3(usdRates.clientSell), floor3(usdRates.clientAvg), floor3(usdRates.clientSell - usdRates.clientBuy),'', '', ''],
@@ -166,7 +168,7 @@ export default function CompanyPage() {
   const [dropOpen,        setDropOpen]        = useState(false);
   const dropRef = useRef(null);
 
-  const { rates: officialRates, loading: offLoading, error: offError, priceMargin } = useOfficialRates();
+  const { rates: officialRates, loading: offLoading, error: offError, priceMargin , bulletinNumber } = useOfficialRates();
   const { rows: forexRows,      loading: fxLoading,  error: fxError  }              = useForexRates(forexSource);
 
   const maxMargin = getSafeMargin(priceMargin);
@@ -305,8 +307,13 @@ export default function CompanyPage() {
                     <span className="cmb-badge-label">وسطي</span>
                     {usdRates.clientAvg.toLocaleString()}
                   </span>
+
+                  <span className='cmb-badge-label'>
+                    {bulletinNumber ? `النشرة رقم ${bulletinNumber}` : 'رقم النشرة غير متوفر'}
+                  </span>
                 </div>
               )}
+
 
               <button
                 className="cmb-export"
