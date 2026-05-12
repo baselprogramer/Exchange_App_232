@@ -11,8 +11,8 @@ using PdfToExcel.Data;
 namespace PdfToExcel.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260511074654_AddBulletinNumberAndPublishDate")]
-    partial class AddBulletinNumberAndPublishDate
+    [Migration("20260511183721_AddMidColumnToForex")]
+    partial class AddMidColumnToForex
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -282,6 +282,9 @@ namespace PdfToExcel.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<decimal>("Mid")
+                        .HasColumnType("TEXT");
+
                     b.Property<decimal>("Sell")
                         .HasColumnType("TEXT");
 
@@ -325,13 +328,7 @@ namespace PdfToExcel.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("BulletinNumber")
-                        .HasColumnType("INTEGER");
-
                     b.Property<decimal?>("PriceMargin")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("PublishDate")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

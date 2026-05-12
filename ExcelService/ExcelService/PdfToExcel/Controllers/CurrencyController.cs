@@ -99,8 +99,6 @@ public class CurrencyController : Controller
     public async Task<IActionResult> PublishOfficial()
     {
         decimal? priceMargin = null;
-        int? bulletinNumber = null;       // 👈 new
-        DateTime? publishDate = null;     // 👈 new
 
         try
         {
@@ -113,25 +111,20 @@ public class CurrencyController : Controller
                     var json = System.Text.Json.JsonDocument.Parse(body);
 
                     if (json.RootElement.TryGetProperty("priceMargin", out var marginElement))
+                    {
                         if (marginElement.ValueKind != System.Text.Json.JsonValueKind.Null)
+                        {
                             priceMargin = marginElement.GetDecimal();
-
-                    // 👇 new
-                    if (json.RootElement.TryGetProperty("bulletinNumber", out var bulletinElement))
-                        if (bulletinElement.ValueKind != System.Text.Json.JsonValueKind.Null)
-                            bulletinNumber = bulletinElement.GetInt32();
-
-                    // 👇 new
-                    if (json.RootElement.TryGetProperty("publishDate", out var dateElement))
-                        if (dateElement.ValueKind != System.Text.Json.JsonValueKind.Null)
-                            publishDate = dateElement.GetDateTime();
-                            
+                        }
+                    }
                 }
             }
         }
-        catch { }
+        catch
+        {
+        }
 
-        var result = await PublishInternalAsync("official", priceMargin, bulletinNumber, publishDate);
+        var result = await PublishInternalAsync("official", priceMargin);
 
         if (IsAjaxRequest())
         {
@@ -143,7 +136,6 @@ public class CurrencyController : Controller
         TempData[result.success ? "Success" : "Error"] = result.message;
         return RedirectToAction("Official");
     }
-    
 
     [HttpGet]
     public IActionResult DownloadExcel(string type)
@@ -234,11 +226,7 @@ public class CurrencyController : Controller
         Request.Headers.TryGetValue("X-Requested-With", out var requestedWith) &&
         string.Equals(requestedWith, "XMLHttpRequest", StringComparison.OrdinalIgnoreCase);
 
-    private async Task<(bool success, string message, int count)> PublishInternalAsync(
-    string type, 
-    decimal? priceMargin,
-    int? bulletinNumber = null,       //  new
-    DateTime? publishDate = null)     //  new
+    private async Task<(bool success, string message, int count)> PublishInternalAsync(string type, decimal? priceMargin)
     {
         var path = Path.Combine(_env.WebRootPath, "files", $"{type}.xlsx");
         if (!System.IO.File.Exists(path))
@@ -303,9 +291,7 @@ public class CurrencyController : Controller
             _context.PriceMargins.Add(existing);
         }
 
-        existing.PriceMargin    = priceMargin;
-        existing.BulletinNumber = bulletinNumber;   //  new
-        existing.PublishDate    = publishDate;      //  new
+        existing.PriceMargin = priceMargin;
 
         await _context.SaveChangesAsync();
 

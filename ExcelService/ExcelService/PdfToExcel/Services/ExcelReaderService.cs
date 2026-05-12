@@ -78,6 +78,7 @@ public class ExcelReaderService
                 Flag = GetFlag(code),
                 Country = country,
                 Code = code,
+                Mid = (decimal)mid,  
                 Buy = (decimal)buy,
                 Sell = (decimal)sell,
 
