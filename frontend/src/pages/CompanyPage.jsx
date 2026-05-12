@@ -14,7 +14,7 @@ function getSafeMargin(raw) {
 
 // Always truncate down at 3 decimal places, never round up
 const floor3 = (n) => Math.floor(n * 1000) / 1000;
-
+``
 function applyMargin(rate, margin) {
   const mul  = 1 + (Number(margin) || 0) / 100;
   let clientSell, clientBuy;
