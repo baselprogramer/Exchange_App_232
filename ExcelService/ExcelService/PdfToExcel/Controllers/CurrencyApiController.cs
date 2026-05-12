@@ -26,7 +26,7 @@ public class CurrencyApiController : ControllerBase
                 id = x.Id,
                 code = x.Code,
                 country = x.Country,
-                mid = (x.Sell + x.Buy) / 2,
+                mid = x.Mid,
                 sell = x.Sell,
                 buy = x.Buy,
                 flag = x.Flag
