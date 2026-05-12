@@ -27,7 +27,7 @@ builder.Services.AddScoped<ExcelReaderService>();
 
 // Database
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite("Data Source=app.db"));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Identity
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
@@ -35,6 +35,13 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
     options.SignIn.RequireConfirmedAccount = false;
 })
 .AddEntityFrameworkStores<AppDbContext>();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.SameSite = SameSiteMode.Lax; // يسمح بنقل الكوكي بين بورت 80 و 90 في نفس الـ IP
+    options.Cookie.HttpOnly = true;
+});
+
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -53,7 +60,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("FrontendPolicy",
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
+            policy.WithOrigins("http://10.16.150.54:80" , "http://localhost:80" , "http://localhost" , "http://10.16.150.54" , "http://10.16.150.54:90" , "https://api.lira-guide.com" , "https://lira-guide.com" )
                   .AllowAnyMethod()
                   .AllowAnyHeader()
                   .AllowCredentials();

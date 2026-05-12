@@ -26,7 +26,7 @@ public class CurrencyApiController : ControllerBase
                 id = x.Id,
                 code = x.Code,
                 country = x.Country,
-                mid = x.Mid,
+                mid = (x.Sell + x.Buy) / 2,
                 sell = x.Sell,
                 buy = x.Buy,
                 flag = x.Flag
@@ -55,15 +55,15 @@ public class CurrencyApiController : ControllerBase
             })
             .ToListAsync();
 
-        var priceMargin = await _context.PriceMargins
-            .Select(x => x.PriceMargin)
-            .FirstOrDefaultAsync();
+       var priceMarginRecord = await _context.PriceMargins.FirstOrDefaultAsync();
 
         return Ok(new
         {
-            rows = data,
-            total = data.Count,
-            priceMargin = priceMargin
+            rows         = data,
+            total        = data.Count,
+            priceMargin  = priceMarginRecord?.PriceMargin,
+            bulletinNumber = priceMarginRecord?.BulletinNumber,   // 👈 new
+            publishDate  = priceMarginRecord?.PublishDate,        // 👈 new
         });
     }
 }
