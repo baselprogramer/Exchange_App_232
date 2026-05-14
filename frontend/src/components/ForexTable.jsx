@@ -14,7 +14,7 @@ async function fetchCentral() {
     ...r,
     buy: parseFloat(r.buy).toFixed(4),
     sell: parseFloat(r.sell).toFixed(4),
-    avg: parseFloat(((Number(r.buy) + Number(r.sell)) / 2).toFixed(4)),
+    avg: parseFloat(r.mid).toFixed(4),
   }));
 }
 
