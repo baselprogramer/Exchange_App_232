@@ -11,8 +11,8 @@ using PdfToExcel.Data;
 namespace PdfToExcel.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260512094008_AddMidColumnToForex")]
-    partial class AddMidColumnToForex
+    [Migration("20260513132335_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -298,6 +298,9 @@ namespace PdfToExcel.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Average")
+                        .HasColumnType("TEXT");
 
                     b.Property<decimal>("Buy")
                         .HasColumnType("TEXT");

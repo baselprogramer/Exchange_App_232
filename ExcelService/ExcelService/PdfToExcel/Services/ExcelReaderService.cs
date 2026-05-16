@@ -106,6 +106,7 @@ public class ExcelReaderService
 
             var buy = GetNumberCell(row, headerMap, "buy");
             var sell = GetNumberCell(row, headerMap, "sell");
+            var average = GetNumberCell(row, headerMap, "average");
 
             list.Add(new OfficialCurrency
             {
@@ -113,6 +114,7 @@ public class ExcelReaderService
                 Flag = GetFlag(code),
                 Country = country,
                 Code = code,
+                Average = (decimal)average,
                 Buy = (decimal)buy,
                 Sell = (decimal)sell
                 

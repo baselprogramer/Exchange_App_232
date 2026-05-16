@@ -57,7 +57,6 @@ async function fetchCentral() {
       ...r,
       country: NAMES[r.code] || r.country,
       flag: FLAGS[r.code] || r.flag,    
-      average: parseFloat(((Number(r.buy) + Number(r.sell)) / 2).toFixed(3)),
     }));
 }
 

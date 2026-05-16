@@ -296,6 +296,9 @@ namespace PdfToExcel.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<decimal>("Average")
+                        .HasColumnType("TEXT");
+
                     b.Property<decimal>("Buy")
                         .HasColumnType("TEXT");
 
@@ -325,7 +328,13 @@ namespace PdfToExcel.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("BulletinNumber")
+                        .HasColumnType("INTEGER");
+
                     b.Property<decimal?>("PriceMargin")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("PublishDate")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

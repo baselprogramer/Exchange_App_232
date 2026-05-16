@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PdfToExcel.Migrations
 {
     /// <inheritdoc />
-    public partial class AddMidColumnToForex : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -106,6 +106,7 @@ namespace PdfToExcel.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Code = table.Column<string>(type: "TEXT", nullable: false),
                     Country = table.Column<string>(type: "TEXT", nullable: false),
+                    Average = table.Column<decimal>(type: "TEXT", nullable: false),
                     Buy = table.Column<decimal>(type: "TEXT", nullable: false),
                     Sell = table.Column<decimal>(type: "TEXT", nullable: false),
                     Flag = table.Column<string>(type: "TEXT", nullable: false)

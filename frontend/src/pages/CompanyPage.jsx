@@ -131,14 +131,15 @@ function exportToExcelCentral(displayRows, margin, maxMargin, source, usdRates ,
   ...displayRows
     .filter(r => r.code !== 'USD')
     .map(r => [
-      r.country, r.code,
+      r.country, 
+      r.code,
       r.finalBuy  ?? r.clientBuy,
       r.finalSell ?? r.clientSell,
       r.finalAvg  ?? r.clientAvg,
+      Number(r.finalSell) - Number(r.finalBuy),
       Number(r.buy),
       Number(r.sell),
       Number(r.mid ?? r.average ?? r.avg),
-      Number(r.sell) - Number(r.buy),
     ]),
   ]);
   ws['!cols']   = [{wch:22},{wch:8},{wch:16},{wch:16},{wch:16},{wch:16},{wch:16},{wch:16}];
@@ -183,7 +184,7 @@ export default function CompanyPage() {
   const baseRates = useMemo(() => {
     if (!forexSource || !forexRows.length) return officialRates;
     const usdOfficial = officialRates.find(r => r.code === 'USD');
-    const merged = forexRows.map(r => ({ ...r, average: r.average ?? r.avg }));
+    const merged = forexRows.map(r => ({ ...r, average: r.mid ?? r.avg }));
     if (usdOfficial) {
       const idx = merged.findIndex(r => r.code === 'USD');
       if (idx >= 0) merged[idx] = usdOfficial;

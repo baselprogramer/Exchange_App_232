@@ -47,9 +47,9 @@ public class CurrencyApiController : ControllerBase
                 id = x.Id,
                 code = x.Code,
                 country = x.Country,
+                average = x.Average,
                 buy = x.Buy,
                 sell = x.Sell,
-                average = x.Average,
                 margin = x.Margin,
                 flag = x.Flag,
             })
